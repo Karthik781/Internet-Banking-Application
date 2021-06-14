@@ -12,11 +12,11 @@ import com.iba.pojo.TermAccountPojo;
 public interface AccountService {
 
 	
-	public AccountPojo TransferMoney(AccountPojo transfermoney);
+	public AccountPojo TransferMoney(long accountId, long receiverId, double amount, long userId, String password);
     
-	public AccountPojo Withdraw(long accountId, double amount);
+	public AccountPojo withdraw(long accountId, double amount, long name, String password);
     
-	public AccountPojo Deposit(long accountId, double amount);    		
+	public AccountPojo deposit(long accountId, double amount);    		
 	
 	public SavingAccountPojo addSavingsAccount(SavingAccountPojo savingaccount);
 	

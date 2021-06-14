@@ -9,7 +9,6 @@ public class BeneficiaryPojo {
 	@NotBlank(message ="name cannot be blank")
 	private String beneficiaryName;
 	
-	@NotBlank(message ="account cannot be blank")
 	private long beneficiaryAccountNumber;
 	
 	@NotBlank(message ="IFSC cannot be blank")

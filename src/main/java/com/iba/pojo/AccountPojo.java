@@ -111,7 +111,7 @@ public class AccountPojo {
 	public String toString() {
 		return "AccountPojo [accountId=" + accountId + ", interestRate=" + interestRate + ", balance=" + balance
 				+ ", dateOfJoining=" + dateOfJoining + ", customer=" + customer + ", beneficiaries=" + beneficiaries
-				+ ", transactions=" + transactions + ", nominees=" + nominees + "]";
+				+ ", transactions=" + transactions + "]";
 	}
 	
 	

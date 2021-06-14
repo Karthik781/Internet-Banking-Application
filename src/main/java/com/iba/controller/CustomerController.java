@@ -40,6 +40,11 @@ public class CustomerController {
 		return customerService.updateCustomer(customer);
 	}
 	
+	@GetMapping("/{id}")
+	public CustomerPojo findCustomerById(@PathVariable("id") long customerId) {
+		return customerService.findCustomerById(customerId);
+	}
+	
 	@DeleteMapping("/delete/{id}")
 	public boolean deleteCustomer(@PathVariable("id") long customerId) {
 		return customerService.deleteCustomer(customerId);

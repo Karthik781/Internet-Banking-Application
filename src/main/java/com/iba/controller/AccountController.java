@@ -18,6 +18,7 @@ import com.iba.entity.SavingAccountEntity;
 import com.iba.pojo.AccountPojo;
 import com.iba.pojo.SavingAccountPojo;
 import com.iba.pojo.TermAccountPojo;
+import com.iba.pojo.TransactionJson;
 import com.iba.service.AccountService;
 
 @RestController
@@ -92,7 +93,31 @@ public class AccountController {
 	
 	@PutMapping("/deposit/{accountId}/{amount}")
 	public AccountPojo deposit(@PathVariable long accountId, @PathVariable double amount) {
-		return accountService.Deposit(accountId, amount);
+		return accountService.deposit(accountId, amount);
+	}
+	
+	@PutMapping("/withdraw")
+	public AccountPojo withdraw(@RequestBody TransactionJson object ) {
+		
+		long accountId = object.getAccountId();
+		double amount = object.getAmount();
+		long username = object.getUserId();
+		String password = object.getPassword();
+		
+		return accountService.withdraw(accountId, amount, username, password);
+		
+	}
+	@PutMapping("/transfer")
+	public AccountPojo TransferMoney(@RequestBody TransactionJson object ) {
+		
+		long accountId = object.getAccountId();
+		double amount = object.getAmount();
+		long username = object.getUserId();
+		String password = object.getPassword();
+		long receiverId = object.getReceiverAccountId();
+		
+		return accountService.TransferMoney(accountId, receiverId, amount, username, password);
+		
 	}
 
 }

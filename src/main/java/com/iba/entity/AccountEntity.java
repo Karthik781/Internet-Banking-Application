@@ -197,6 +197,13 @@ public class AccountEntity {
 	}
 
 
+	@Override
+	public String toString() {
+		return "AccountEntity [accountId=" + accountId + ", interestRate=" + interestRate + ", balance=" + balance
+				+ ", dateOfJoining=" + dateOfJoining + "]";
+	}
+
+
 	
 	
 	

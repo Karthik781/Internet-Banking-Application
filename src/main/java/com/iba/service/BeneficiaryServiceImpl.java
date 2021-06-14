@@ -95,7 +95,7 @@ public class BeneficiaryServiceImpl implements BeneficiaryService{
 		
 		BeanUtils.copyProperties(accountEntity, accountPojo);
 		
-		BeanUtils.copyProperties(beneficiaryEntity, beneficiaryPojo);
+		BeanUtils.copyProperties(beneficiaryEntity.get(), beneficiaryPojo);
 		
 		beneficiaryPojo.setAccount(accountPojo);
 		
@@ -136,7 +136,7 @@ public class BeneficiaryServiceImpl implements BeneficiaryService{
 	@Override
 	public	List<BeneficiaryPojo> findAllBeneficiariesByAccount(long accountId) {
 		List<BeneficiaryEntity> beneficiaryEntities = beneficiaryRepository.findAllBeneficiariesByAccount(accountId);
-		
+	
 		if(beneficiaryEntities.isEmpty()) {
 			throw new BeneficiaryNotFoundException("No beneficiaries  found");
 		}

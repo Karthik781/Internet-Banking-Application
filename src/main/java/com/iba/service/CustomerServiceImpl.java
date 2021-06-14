@@ -32,6 +32,10 @@ public class CustomerServiceImpl implements CustomerService {
 
 		CustomerEntity newEntity = customerRepository.save(entity);
 
+		if (newEntity.equals(null) == true) {
+			throw new CustomerNotFoundException("customer not added!");
+		}
+
 		BeanUtils.copyProperties(newEntity, customer);
 
 		return customer;
@@ -60,8 +64,8 @@ public class CustomerServiceImpl implements CustomerService {
 	public List<CustomerPojo> listAllCustomers() {
 
 		List<CustomerEntity> cutomer = customerRepository.findAll();
-		
-		if(cutomer.isEmpty()) {
+
+		if (cutomer.isEmpty()) {
 			throw new CustomerNotFoundException("No cutomer  found");
 		}
 
@@ -90,9 +94,9 @@ public class CustomerServiceImpl implements CustomerService {
 	public CustomerPojo findCustomerById(long customerId) {
 
 		Optional<CustomerEntity> entity = customerRepository.findById(customerId);
-		
-		if(entity.isPresent() == false) {
-			throw new CustomerNotFoundException("Customer with ID:" +customerId + "");
+
+		if (entity.isPresent() == false) {
+			throw new CustomerNotFoundException("Customer with id not found");
 		}
 
 		CustomerPojo pojo = new CustomerPojo();

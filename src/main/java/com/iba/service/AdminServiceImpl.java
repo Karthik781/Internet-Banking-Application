@@ -26,7 +26,7 @@ public class AdminServiceImpl implements AdminService {
 	public AdminPojo findAdminById(long adminId) {
 		Optional<AdminEntity> result = adminRepository.findById(adminId);
 		if (result.isPresent() == false) {
-			throw new AdminNotFoundException("Admin with ID:" + adminId + " not found");
+			throw new AdminNotFoundException("Admin with Id not found");
 		}
 		if (result.isPresent()) {
 			AdminPojo pojo = new AdminPojo();

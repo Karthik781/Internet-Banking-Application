@@ -1,6 +1,8 @@
 package com.iba.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -11,11 +13,15 @@ import org.springframework.stereotype.Service;
 import com.iba.entity.AccountEntity;
 import com.iba.entity.AdminEntity;
 import com.iba.entity.BeneficiaryEntity;
+import com.iba.entity.CustomerEntity;
 import com.iba.entity.NomineeEntity;
 import com.iba.entity.SavingAccountEntity;
 import com.iba.entity.TermAccountEntity;
 import com.iba.entity.TransactionEntity;
 import com.iba.exception.AccountNotFoundException;
+import com.iba.exception.AuthenticationFailedException;
+import com.iba.exception.CustomerNotFoundException;
+import com.iba.exception.NoBalanceException;
 import com.iba.pojo.AccountPojo;
 import com.iba.pojo.AdminPojo;
 import com.iba.pojo.BeneficiaryPojo;
@@ -24,6 +30,7 @@ import com.iba.pojo.SavingAccountPojo;
 import com.iba.pojo.TermAccountPojo;
 import com.iba.pojo.TransactionPojo;
 import com.iba.repository.AccountRepository;
+import com.iba.repository.CustomerRepository;
 import com.iba.repository.SavingAccountRepository;
 import com.iba.repository.TermAccountRepository;
 import com.iba.repository.TransactionRepository;
@@ -40,25 +47,161 @@ public class AccountServiceImpl implements AccountService {
 	@Autowired
 	public TermAccountRepository termAccountRepository;
 
-//	@Autowired
-	public TransactionRepository transactionRepository;
+	@Autowired
+	public CustomerRepository customerRepository;
 
-	public AccountServiceImpl() {
+	@Override
+	public AccountPojo TransferMoney(long accountId, long receiverId, double amount, long userId, String password) {
+		Optional<SavingAccountEntity> accountEntityOptional = savingAccountRepository.findById(accountId);
+		if (accountEntityOptional.isPresent() == false) {
+			throw new AccountNotFoundException("Account with ID:" + accountId + " not found!");
+		}
+
+		Optional<SavingAccountEntity> receiverOptional = savingAccountRepository.findById(receiverId);
+		if (receiverOptional.isPresent() == false) {
+			throw new AccountNotFoundException("Account with ID:" + accountId + " not found!");
+		}
+
+		CustomerEntity customerEntity = customerRepository.getById(userId);
+
+		if (customerEntity.equals(null) == true) {
+			throw new CustomerNotFoundException("Customer with userId:" + userId + " not found");
+		} else if (customerEntity.getUserId() == userId && customerEntity.getPassword() == password) {
+
+			throw new AuthenticationFailedException("User id or password is wrong!");
+
+		}
+		SavingAccountEntity accountEntity = accountEntityOptional.get();
+		SavingAccountEntity receiverEntity = receiverOptional.get();
+
+		SavingAccountPojo accountPojo = new SavingAccountPojo();
+
+		double balance = accountEntity.getBalance();
+		System.out.println(accountEntity.getMinBalance());
+		if (balance - amount < accountEntity.getMinBalance()) {
+			throw new NoBalanceException("Insufficent balace to proceed to transaction!");
+		}
+
+		accountEntity.setBalance(balance - amount);
+
+		double receiverbalance = receiverEntity.getBalance();
+		receiverEntity.setBalance(receiverbalance + amount);
+
+		List<BeneficiaryEntity> beneficiaryEntities = accountEntity.getBeneficiaries();
+		BeneficiaryEntity beneficiaryEntity = beneficiaryEntities.get(0);
+
+		TransactionEntity transactionEntity = new TransactionEntity();
+
+		List<TransactionEntity> transactionEntities = new ArrayList<TransactionEntity>();
+
+		transactionEntity.setAccount(accountEntity);
+		transactionEntity.setAmount(amount);
+		transactionEntity.setTransactionType("withdraw");
+		transactionEntity.setTransactionStatus("success!");
+		transactionEntity.setTransactionRemarks("Transfer Successful!");
+		transactionEntity.setBeneficiary(beneficiaryEntity);
+		transactionEntities.add(transactionEntity);
+
+		TransactionPojo transactionPojo = new TransactionPojo();
+		BeanUtils.copyProperties(transactionEntity, transactionPojo);
+
+		accountEntity.setTransactions(transactionEntities);
+
+		accountEntity = accountRepository.saveAndFlush(accountEntity);
+
+		BeanUtils.copyProperties(accountEntity, accountPojo);
+
+		List<TransactionEntity> allTransactionEntities = accountEntity.getTransactions();
+		List<TransactionPojo> allTransactionPojos = new ArrayList<TransactionPojo>();
+		for (TransactionEntity tEntity : allTransactionEntities) {
+			TransactionPojo tPojo = new TransactionPojo();
+			BeanUtils.copyProperties(tEntity, tPojo);
+			tPojo.setBeneficiary(null);
+
+			allTransactionPojos.add(tPojo);
+		}
+
+		accountPojo.setTransactions(allTransactionPojos);
+		return accountPojo;
+	}
+
+	@Override
+	public AccountPojo withdraw(long accountId, double amount, long userId, String password) {
+
+		Optional<SavingAccountEntity> accountEntityOptional = savingAccountRepository.findById(accountId);
+		if (accountEntityOptional.isPresent() == false) {
+			throw new AccountNotFoundException("Account with ID:" + accountId + " not found!");
+		}
+
+		CustomerEntity customerEntity = customerRepository.getById(userId);
+		System.out.println(userId);
+		System.out.println(password);
+		System.out.println(customerEntity);
+		System.out.println(customerEntity.getUserId());
+		System.out.println(customerEntity.getPassword());
+		if (customerEntity.equals(null) == true) {
+			throw new CustomerNotFoundException("Customer with userId:" + userId + " not found");
+		} else if (customerEntity.getUserId() == userId && customerEntity.getPassword() == password) {
+
+			throw new AuthenticationFailedException("User id or password is wrong!");
+
+		}
+		SavingAccountEntity accountEntity = accountEntityOptional.get();
+
+		SavingAccountPojo accountPojo = new SavingAccountPojo();
+
+		double balance = accountEntity.getBalance();
+
+		if (balance - amount < accountEntity.getMinBalance()) {
+			throw new NoBalanceException("Insufficent balace to proceed to transaction!");
+		}
+
+		accountEntity.setBalance(balance - amount);
+
+		List<BeneficiaryEntity> beneficiaryEntities = accountEntity.getBeneficiaries();
+		BeneficiaryEntity beneficiaryEntity = beneficiaryEntities.get(0);
+
+		TransactionEntity transactionEntity = new TransactionEntity();
+
+		List<TransactionEntity> transactionEntities = new ArrayList<TransactionEntity>();
+
+		transactionEntity.setAccount(accountEntity);
+		transactionEntity.setAmount(amount);
+		transactionEntity.setTransactionType("withdraw");
+		transactionEntity.setTransactionStatus("success!");
+		transactionEntity.setBeneficiary(beneficiaryEntity);
+//		BeanUtils.copyProperties(beneficiaryEntity, beneficiaryPojo);
+//		System.out.println(beneficiaryPojo);
+
+		transactionEntities.add(transactionEntity);
+//		System.out.println(transactionEntities);
+
+		TransactionPojo transactionPojo = new TransactionPojo();
+		BeanUtils.copyProperties(transactionEntity, transactionPojo);
+
+		accountEntity.setTransactions(transactionEntities);
+
+		accountEntity = accountRepository.saveAndFlush(accountEntity);
+
+		BeanUtils.copyProperties(accountEntity, accountPojo);
+
+		List<TransactionEntity> allTransactionEntities = accountEntity.getTransactions();
+		List<TransactionPojo> allTransactionPojos = new ArrayList<TransactionPojo>();
+		for (TransactionEntity tEntity : allTransactionEntities) {
+			TransactionPojo tPojo = new TransactionPojo();
+			BeanUtils.copyProperties(tEntity, tPojo);
+			tPojo.setBeneficiary(null);
+
+			allTransactionPojos.add(tPojo);
+		}
+
+		accountPojo.setTransactions(allTransactionPojos);
+		return accountPojo;
 
 	}
 
 	@Override
-	public AccountPojo TransferMoney(AccountPojo transfermoney) {
-		return transfermoney;
-	}
-
-	@Override
-	public AccountPojo Withdraw(long accountId, double amount) {
-		return null;
-	}
-
-	@Override
-	public AccountPojo Deposit(long accountId, double amount) {
+	public AccountPojo deposit(long accountId, double amount) {
 
 		SavingAccountEntity accountEntity = savingAccountRepository.findById(accountId).get();
 
@@ -85,17 +228,16 @@ public class AccountServiceImpl implements AccountService {
 
 		transactionEntities.add(transactionEntity);
 //		System.out.println(transactionEntities);
-		
+
 		TransactionPojo transactionPojo = new TransactionPojo();
 		BeanUtils.copyProperties(transactionEntity, transactionPojo);
-		
-		accountEntity.setTransactions(transactionEntities);
 
+		accountEntity.setTransactions(transactionEntities);
 
 		accountEntity = accountRepository.saveAndFlush(accountEntity);
 
 		BeanUtils.copyProperties(accountEntity, accountPojo);
-		
+
 		List<TransactionEntity> allTransactionEntities = accountEntity.getTransactions();
 		List<TransactionPojo> allTransactionPojos = new ArrayList<TransactionPojo>();
 		for (TransactionEntity tEntity : allTransactionEntities) {
@@ -107,7 +249,6 @@ public class AccountServiceImpl implements AccountService {
 		}
 
 		accountPojo.setTransactions(allTransactionPojos);
-		
 
 		return accountPojo;
 	}
@@ -406,11 +547,11 @@ public class AccountServiceImpl implements AccountService {
 	public List<SavingAccountPojo> listAllSavingsAccounts() {
 
 		List<SavingAccountEntity> accountEntities = savingAccountRepository.findAll();
-		
+
 		if (accountEntities.isEmpty()) {
 			throw new AccountNotFoundException("No Accounts found!");
 		}
-		
+
 		System.out.println(accountEntities);
 		List<SavingAccountPojo> allAccounts = new ArrayList<SavingAccountPojo>();
 		for (AccountEntity account : accountEntities) {
@@ -464,7 +605,7 @@ public class AccountServiceImpl implements AccountService {
 	public List<TermAccountPojo> listAllTermAccounts() {
 
 		List<AccountEntity> accountEntities = termAccountRepository.findAll();
-		
+
 		if (accountEntities.isEmpty()) {
 			throw new AccountNotFoundException("No Accounts found!");
 		}

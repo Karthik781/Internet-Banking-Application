@@ -101,6 +101,13 @@ public class BeneficiaryEntity {
 		this.account = account;
 	}
 
+	@Override
+	public String toString() {
+		return "BeneficiaryEntity [beneficiaryId=" + beneficiaryId + ", beneficiaryName=" + beneficiaryName
+				+ ", beneficiaryAccountNumber=" + beneficiaryAccountNumber + ", IFSC=" + IFSC + ", accountType="
+				+ accountType + "]";
+	}
+
 
 	
 

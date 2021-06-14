@@ -110,6 +110,13 @@ public class CustomerEntity extends UserEntity{
 	public void setAccounts(List<AccountEntity> accounts) {
 		this.accounts = accounts;
 	}
+
+	@Override
+	public String toString() {
+		return "CustomerEntity [customerId=" + customerId + ", customerName=" + customerName + ", phoneNo=" + phoneNo
+				+ ", emailId=" + emailId + ", age=" + age + ", gender=" + gender + ", getUserId()=" + getUserId()
+				+ ", getPassword()=" + getPassword() + "]";
+	}
 		
 		
 	

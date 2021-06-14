@@ -1,9 +1,12 @@
 package com.iba;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -14,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.iba.entity.AccountEntity;
 import com.iba.entity.CustomerEntity;
+import com.iba.exception.CustomerNotFoundException;
 import com.iba.pojo.CustomerPojo;
 import com.iba.repository.CustomerRepository;
 import com.iba.service.CustomerService;
@@ -69,5 +73,44 @@ public class CustomerServiceTest {
 		assertEquals("maria", customerService.addCustomer(mockArgumentCustomer).getCustomerName());
 	}
 	
+
+	
+	@Test
+	public void testfindCustomerByIdException() {
+		Optional<CustomerEntity> courseEntity = Optional.empty();
+		
+		CustomerPojo mockArgumentCustomer = new CustomerPojo();
+		mockArgumentCustomer.setAge(20);
+		mockArgumentCustomer.setCustomerName("maria");
+		mockArgumentCustomer.setEmailId("maria@mail.com");
+		mockArgumentCustomer.setGender("female");
+		mockArgumentCustomer.setPhoneNo("8548484884");
+		
+		Mockito.when(customerRepository.findById(Mockito.anyLong())).thenReturn(courseEntity);
+
+		Exception exception = assertThrows(CustomerNotFoundException.class,	() -> customerService.findCustomerById(20));
+
+		assertEquals("Customer with id not found", exception.getMessage());
+		
+	}
+	
+	@Test
+	public void testAddCustomerException() {
+		CustomerEntity customerEntity = null;
+		
+		CustomerPojo mockArgumentCustomer = new CustomerPojo();
+		mockArgumentCustomer.setAge(20);
+		mockArgumentCustomer.setCustomerName("maria");
+		mockArgumentCustomer.setEmailId("maria@mail.com");
+		mockArgumentCustomer.setGender("female");
+		mockArgumentCustomer.setPhoneNo("8548484884");
+		
+		Mockito.when(customerRepository.save(Mockito.any(CustomerEntity.class))).thenReturn(customerEntity);
+
+		Exception exception = assertThrows(CustomerNotFoundException.class,	() -> customerService.addCustomer(mockArgumentCustomer));
+
+		assertNotEquals("customer not added!", exception.getMessage());
+		
+	}
 
 }
