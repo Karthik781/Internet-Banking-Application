@@ -16,3 +16,17 @@ Able to validate customer personal details and approve or decline account creati
 - **oracle 11g**: Database
 - **Junit and mcokito**: Unit Testing
 
+## installation
+
+Clone the project repository
+
+```bash
+git clone https://github.com/Karthik781/Internet-Banking-Application.git
+```
+
+Import the project into editor and refresh gradle project
+
+And Building is finished, run the spring boot project
+
+
+Now your app will be up and running in port at http://localhost:8081/
