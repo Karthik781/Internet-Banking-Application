@@ -10,3 +10,9 @@ Perform transactions such as deposit, withdrawal and money transfer, post the su
 Admin should able to :
 Able to validate customer personal details and approve or decline account creation request.
 
+## technologies
+- **java 1.8**: implementing language
+- **spring boot**: server side framework
+- **oracle 11g**: Database
+- **Junit and mcokito**: Unit Testing
+
